@@ -30,7 +30,7 @@ endmacro()
 
 macro(get_gtoolkit_library_platform PLATFORM_VAR LIBPREFIX_VAR LIBSUFFIX_VAR)
     set(${LIBPREFIX_VAR} "lib")
-    if(WIN32)
+    if(WIN)
         set(${PLATFORM_VAR} "windows")
         set(${LIBSUFFIX_VAR} ".dll")
     else()

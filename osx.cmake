@@ -25,6 +25,15 @@ set(EXTRACTED_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/memoryUnix.c
 )
 
+set_source_files_properties(
+  "${CMAKE_CURRENT_SOURCE_DIR}/resources/mac/${APPNAME}.icns"
+  "${CMAKE_CURRENT_SOURCE_DIR}/resources/mac/${APPNAME}Changes.icns"
+  "${CMAKE_CURRENT_SOURCE_DIR}/resources/mac/${APPNAME}Image.icns"
+  "${CMAKE_CURRENT_SOURCE_DIR}/resources/mac/${APPNAME}Sources.icns"
+  PROPERTIES
+  MACOSX_PACKAGE_LOCATION Resources
+)
+
 set(VM_FRONTEND_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/unixMain.c)
 if("${APPNAME}" STREQUAL "GToolkit")
     set(VM_FRONTEND_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/macMainGToolkit.m)
@@ -33,9 +42,12 @@ endif()
 set(VM_FRONTEND_SOURCES
     ${VM_FRONTEND_SOURCES}
     "${CMAKE_CURRENT_SOURCE_DIR}/resources/mac/${APPNAME}.icns"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/mac/${APPNAME}Changes.icns"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/mac/${APPNAME}Image.icns"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/mac/${APPNAME}Sources.icns"
 )
 
-configure_file("resources/mac/${APPNAME}.plist.in" build/includes/Info.plist)
+configure_file(resources/mac/Info.plist.in build/includes/Info.plist)
 
 macro(add_third_party_dependencies_per_platform)
     add_third_party_dependency("pixman-0.34.0" ${LIBRARY_OUTPUT_DIRECTORY})
@@ -58,7 +70,7 @@ endmacro()
 
 macro(configure_installables INSTALL_COMPONENT)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/build/dist")
-
+    
   install(
     DIRECTORY "${CMAKE_BINARY_DIR}/build/vm/"
     DESTINATION "./"

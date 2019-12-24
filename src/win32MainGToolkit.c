@@ -1,6 +1,6 @@
-#include "pharoClient.h"
-#include "fileDialog.h"
-#include "pathUtilities.h"
+#include "pharovm/pharoClient.h"
+#include "pharovm/fileDialog.h"
+#include "pharovm/pathUtilities.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

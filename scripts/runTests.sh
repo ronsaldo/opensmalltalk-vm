@@ -54,7 +54,7 @@ Linux)
         VM_EXECUTABLE_NAME="pharo"
     fi
     TEST_VM_EXECUTABLE="./$VM_EXECUTABLE_NAME"
-    VM_ARCHIVE=../artifacts/$APPNAME-*-linux*-bin.zip
+    VM_ARCHIVE=../artifacts/${APPNAME}VM-*-linux*-bin.zip
     ;;
 Darwin)
     TEST_VM_STAGE_NAME="osx"
@@ -63,7 +63,7 @@ Darwin)
         VM_EXECUTABLE_NAME="Pharo"
     fi
     TEST_VM_EXECUTABLE="./$VM_EXECUTABLE_NAME.app/Contents/MacOS/$VM_EXECUTABLE_NAME"
-    VM_ARCHIVE=../artifacts/$APPNAME-*-mac*-bin.zip
+    VM_ARCHIVE=../artifacts/${APPNAME}VM-*-mac*-bin.zip
     ;;
 CYGWIN*)
     TEST_VM_STAGE_NAME="win64"
@@ -72,7 +72,7 @@ CYGWIN*)
         VM_EXECUTABLE_NAME="Pharo"
     fi
     TEST_VM_EXECUTABLE="./${VM_EXECUTABLE_NAME}Console"
-    VM_ARCHIVE=../artifacts/$APPNAME-*-win*-bin.zip
+    VM_ARCHIVE=../artifacts/${APPNAME}VM-*-win*-bin.zip
     ;;
 *)
     echo "Unsupported operating system $(uname) for running tests"

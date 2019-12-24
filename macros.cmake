@@ -68,11 +68,17 @@ macro(add_third_party_dependency NAME TARGETPATH)
 
     get_platform_name(PLATNAME)
 
+    if(${ARGC} GREATER 2)
+        set(DOWNLOAD_URL "${ARGV2}")
+    else()
+        set(DOWNLOAD_URL "https://files.pharo.org/vm/pharo-spur64/${PLATNAME}/third-party/${NAME}.zip")
+    endif()
+
     message("Adding third-party libraries for ${PLATNAME}: ${NAME}")
 
     add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/build/third-party/${NAME}.zip"
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/build/third-party
-        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_BINARY_DIR}/build/third-party wget --no-check-certificate "https://files.pharo.org/vm/pharo-spur64/${PLATNAME}/third-party/${NAME}.zip"
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_BINARY_DIR}/build/third-party wget --no-check-certificate "${DOWNLOAD_URL}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
     add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/build/third-party/${NAME}.done"

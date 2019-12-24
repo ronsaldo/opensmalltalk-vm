@@ -53,12 +53,13 @@ macro(add_third_party_dependencies_per_platform)
     add_third_party_dependency("pixman-0.34.0" ${LIBRARY_OUTPUT_DIRECTORY})
     add_third_party_dependency("cairo-1.15.4" ${LIBRARY_OUTPUT_DIRECTORY})
     add_third_party_dependency("freetype-2.9.1" ${LIBRARY_OUTPUT_DIRECTORY})
-    add_third_party_dependency("libffi-3.3-rc0" ${LIBRARY_OUTPUT_DIRECTORY})
+    #add_third_party_dependency("libffi-3.3-rc0" ${LIBRARY_OUTPUT_DIRECTORY})
     add_third_party_dependency("libgit2-0.25.1" ${LIBRARY_OUTPUT_DIRECTORY})
     add_third_party_dependency("libpng-1.2.49" ${LIBRARY_OUTPUT_DIRECTORY})
     add_third_party_dependency("libssh2-1.7.0" ${LIBRARY_OUTPUT_DIRECTORY})
     add_third_party_dependency("openssl-1.0.2q" ${LIBRARY_OUTPUT_DIRECTORY})
-    add_third_party_dependency("PThreadedFFI-1.1.2-osx64" ${LIBRARY_OUTPUT_DIRECTORY})
+    add_third_party_dependency("PThreadedFFI-1.1.2-osx64" ${LIBRARY_OUTPUT_DIRECTORY}
+        "https://github.com/feenkcom/threadedFFI-Plugin/releases/download/v0.6.1-binaries/PThreadedFFI-1.1.2-osx64.zip")
     add_third_party_dependency("SDL2-2.0.7" ${LIBRARY_OUTPUT_DIRECTORY})
 
     add_gtoolkit_third_party_dependency("Moz2D" ${LIBRARY_OUTPUT_DIRECTORY})
@@ -70,7 +71,7 @@ endmacro()
 
 macro(configure_installables INSTALL_COMPONENT)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/build/dist")
-    
+
   install(
     DIRECTORY "${CMAKE_BINARY_DIR}/build/vm/"
     DESTINATION "./"

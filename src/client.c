@@ -3,6 +3,9 @@
 #include "pharovm/fileDialog.h"
 #include "pharovm/pathUtilities.h"
 
+extern void ioInitWindowSystem(int headlessMode);
+extern void ioShutdownWindowSystem();
+
 #if defined(__GNUC__) && ( defined(i386) || defined(__i386) || defined(__i386__)  \
 			|| defined(i486) || defined(__i486) || defined (__i486__) \
 			|| defined(intel) || defined(x86) || defined(i86pc) )
@@ -28,6 +31,7 @@ void mtfsfi(unsigned long long fpscr)
 static int loadPharoImage(const char* fileName);
 
 EXPORT(int) vm_init(const char* imageFileName, const VMParameterVector *vmParameters, const VMParameterVector *imageParameters) {
+	int isHeadless;
 	initGlobalStructure();
 
 	//Unix Initialization specific
@@ -42,6 +46,10 @@ EXPORT(int) vm_init(const char* imageFileName, const VMParameterVector *vmParame
 
 	aioInit();
 
+	isHeadless = !vm_parameter_vector_has_element(vmParameters, "--headless") &&
+		!vm_parameter_vector_has_element(vmParameters, "-headless");
+	ioInitWindowSystem(isHeadless);
+
 	setPharoCommandLineParameters(vmParameters->parameters, vmParameters->count,
 			imageParameters->parameters, imageParameters->count);
 
@@ -51,6 +59,11 @@ EXPORT(int) vm_init(const char* imageFileName, const VMParameterVector *vmParame
 EXPORT(void) vm_run_interpreter()
 {
 	interpret();
+}
+
+EXPORT(void) vm_shutdown()
+{
+	ioShutdownWindowSystem();
 }
 
 EXPORT(int)
@@ -109,6 +122,7 @@ vm_main_with_parameters(VMParameters *parameters)
 	}
 
 	vm_run_interpreter();
+	vm_shutdown();
 
 	return 0;
 }

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8.4)
 
+option(ENABLE_LEGACY_SDL2_DISPLAY "Enable support for using the legacy display " OFF)
+
 # Use new and simpler escape sequences
 cmake_policy(SET CMP0053 NEW)
 
@@ -229,6 +231,19 @@ check_include_files(uuid.h HAVE_UUID_H)
 check_library_exists(uuid uuidgen "" HAVE_UUIDGEN)
 check_library_exists(uuid uuid_generate "" HAVE_UUID_GENERATE)
 
+# TODO: Bundle the headers along the VM for Windows.
+find_path(SDL2_INCLUDE_DIR NAMES SDL.h PATH_SUFFIXES SDL2)
+find_path(SDL2_LIBRARY_PATH NAMES SDL2.lib SDL2.a)
+find_library(SDL2_LIBRARY NAMES SDL2 PATHS ${SDL2_LIBRARY_PATH})
+if(SDL2_INCLUDE_DIR AND SDL2_LIBRARY)
+    include_directories(${SDL2_INCLUDE_DIR})
+    set(SDL2_FOUND True)
+endif()
+
+if(SDL2_FOUND AND ENABLE_LEGACY_SDL2_DISPLAY)
+    set(USE_SDL2_LEGACY_DISPLAY True)
+endif()
+
 #Custom command that downloads a Pharo image and VM in ${VMMAKER_OUTPUT_PATH}
 add_custom_command(
   OUTPUT ${VMMAKER_OUTPUT_PATH}/Pharo.image ${VMMAKER_OUTPUT_PATH}/pharo
@@ -284,6 +299,7 @@ set(SUPPORT_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/utils.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/errorCode.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/nullDisplay.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/sdl2Display.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/externalPrimitives.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/client.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pathUtilities.c
@@ -312,6 +328,9 @@ if(OSX)
   )
 endif()
 
+if(USE_SDL2_LEGACY_DISPLAY)
+    target_link_libraries(${VM_LIBRARY_NAME} ${SDL2_LIBRARY})
+endif()
 target_link_libraries(${VM_EXECUTABLE_NAME} ${VM_LIBRARY_NAME})
 
 add_required_libs_per_platform()

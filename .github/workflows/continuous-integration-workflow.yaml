@@ -66,6 +66,7 @@ jobs:
                   path: test-results
 
     upload-release:
+        needs: build-unixes
         name: Upload released artifacts
         runs-on: ubuntu-18.04
         steps:

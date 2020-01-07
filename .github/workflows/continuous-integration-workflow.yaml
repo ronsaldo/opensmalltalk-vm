@@ -85,6 +85,9 @@ jobs:
               with:
                 name: build-artifacts
 
+            - name: Create zip for upload
+              run: zip -qyr build-artifacts.zip build-artifacts
+              
             - name: Upload Release Asset
               id: upload-release-asset 
               uses: actions/upload-release-asset@v1.0.1

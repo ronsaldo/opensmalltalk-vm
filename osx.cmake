@@ -62,11 +62,6 @@ macro(add_third_party_dependencies_per_platform)
         "https://github.com/feenkcom/threadedFFI-Plugin/releases/download/v0.6.1-binaries/PThreadedFFI-1.1.2-osx64.zip")
     add_third_party_dependency("SDL2-2.0.7" ${LIBRARY_OUTPUT_DIRECTORY})
 
-    add_gtoolkit_third_party_dependency("Moz2D" ${LIBRARY_OUTPUT_DIRECTORY})
-    add_gtoolkit_third_party_dependency("Skia" ${LIBRARY_OUTPUT_DIRECTORY})
-    add_gtoolkit_third_party_dependency("Glutin" ${LIBRARY_OUTPUT_DIRECTORY})
-    add_gtoolkit_third_party_dependency("Boxer" ${LIBRARY_OUTPUT_DIRECTORY})
-    add_gtoolkit_third_party_dependency("Clipboard" ${LIBRARY_OUTPUT_DIRECTORY})
 endmacro()
 
 macro(configure_installables INSTALL_COMPONENT)

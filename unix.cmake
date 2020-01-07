@@ -35,12 +35,6 @@ macro(add_third_party_dependencies_per_platform)
     add_third_party_dependency("libssh2-1.7.0" "build/vm")
     add_third_party_dependency("openssl-1.0.2q" "build/vm")
     add_third_party_dependency("SDL2-2.0.7" "build/vm")
-
-    add_gtoolkit_third_party_dependency("Moz2D" "build/vm")
-    add_gtoolkit_third_party_dependency("Skia" "build/vm")
-    add_gtoolkit_third_party_dependency("Glutin" "build/vm")
-    add_gtoolkit_third_party_dependency("Boxer" "build/vm")
-    add_gtoolkit_third_party_dependency("Clipboard" "build/vm")
 endmacro()
 
 macro(configure_installables INSTALL_COMPONENT)

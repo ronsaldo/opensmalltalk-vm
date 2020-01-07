@@ -68,6 +68,7 @@ jobs:
     upload-release:
         name: Upload released artifacts
         runs-on: ubuntu-18.04
+          steps:
             - name: Create Release
               id: create_release
               uses: actions/create-release@v1.0.0

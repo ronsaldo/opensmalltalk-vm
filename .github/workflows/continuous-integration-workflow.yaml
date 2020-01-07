@@ -65,40 +65,6 @@ jobs:
                   name: test-results
                   path: test-results
 
-    upload-release:
-        needs: build-unixes
-        name: Upload released artifacts
-        runs-on: ubuntu-18.04
-        steps:
-            - name: Create Release
-              id: create_release
-              uses: actions/create-release@v1.0.0
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                tag_name: tag-${{ github.sha }}
-                release_name: Release ${{ github.ref }}
-                draft: false
-                prerelease: false
-            
-            - uses: actions/download-artifact@v1
-              with:
-                name: build-artifacts
-
-            - name: Create zip for upload
-              run: zip -qyr build-artifacts.zip build-artifacts
-              
-            - name: Upload Release Asset
-              id: upload-release-asset 
-              uses: actions/upload-release-asset@v1.0.1
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-                asset_path: build-artifacts.zip
-                asset_name: build-artifacts.zip
-                asset_content_type: application/zip
-
     build-windows-cygwin:
         name: Build Windows Cygwin
         runs-on: windows-2016
@@ -157,3 +123,36 @@ jobs:
               with:
                   name: test-results
                   path: test-results
+    upload-release:
+        needs: [build-unixes, build-windows-cygwin]
+        name: Upload released artifacts
+        runs-on: ubuntu-18.04
+        steps:
+            - name: Create Release
+              id: create_release
+              uses: actions/create-release@v1.0.0
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                tag_name: tag-${{ github.sha }}
+                release_name: Release ${{ github.ref }}
+                draft: false
+                prerelease: false
+            
+            - uses: actions/download-artifact@v1
+              with:
+                name: build-artifacts
+
+            - name: Create zip for upload
+              run: zip -qyr build-artifacts.zip build-artifacts
+              
+            - name: Upload Release Asset
+              id: upload-release-asset 
+              uses: actions/upload-release-asset@v1.0.1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+                asset_path: build-artifacts.zip
+                asset_name: build-artifacts.zip
+                asset_content_type: application/zip

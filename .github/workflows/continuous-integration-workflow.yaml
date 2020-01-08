@@ -135,7 +135,7 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                 tag_name: tag-${{ github.sha }}
-                release_name: Release ${{ github.ref }}
+                release_name: Release ${{ github.sha }}
                 draft: false
                 prerelease: false
             
@@ -156,3 +156,10 @@ jobs:
                 asset_path: build-artifacts.zip
                 asset_name: build-artifacts.zip
                 asset_content_type: application/zip
+            - name: Trigger GToolkit job
+              uses: appleboy/jenkins-action@master
+              with:
+                url: "https://jenkins.feenk.com/"
+                user: "georgeganea@gmail.com"
+                token: ${{ secrets.JENKINS_TOKEN }}
+                job: "feenkcom/gtoolkit"

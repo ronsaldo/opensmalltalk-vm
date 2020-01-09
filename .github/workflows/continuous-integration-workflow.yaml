@@ -128,7 +128,7 @@ jobs:
         name: Upload released artifacts
         runs-on: ubuntu-18.04
         env:
-            RELEASETAG: ${{  date +'%Y.%m.%d-%H:%M:%S' }}
+            RELEASETAG: date +'%Y.%m.%d-%H:%M:%S'
         steps:
             - name: Create Release
               id: create_release

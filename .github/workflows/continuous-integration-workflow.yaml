@@ -126,18 +126,17 @@ jobs:
     upload-release:
         needs: [build-unixes, build-windows-cygwin]
         name: Upload released artifacts
-        runs-on: ubuntu-18.04
-        env:
-            RELEASETAG: date +'%Y.%m.%d-%H:%M:%S'
+        runs-on: ubuntu-18.04           
         steps:
             - name: Create Release
               id: create_release
               uses: actions/create-release@v1.0.0
               env:
                 GITHUB_TOKEN: ${{ secrets.ACTIONS }}
+                RELEASETAG: date +'%Y.%m.%d-%H:%M:%S'
               with:
-                tag_name: v-${RELEASETAG}
-                release_name: Release ${RELEASETAG}
+                tag_name: v-${{RELEASETAG}}
+                release_name: Release ${{RELEASETAG}}
                 draft: false
                 prerelease: false
             

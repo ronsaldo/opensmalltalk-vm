@@ -136,8 +136,8 @@ jobs:
               env:
                 GITHUB_TOKEN: ${{ secrets.ACTIONS }}
               with:
-                tag_name: v-${{ job.upload-release.env.RELEASETAG }}
-                release_name: Release ${{ job.upload-release.env.RELEASETAG }}
+                tag_name: v-${{ github.sha }}
+                release_name: Release ${{ github.sha }}
                 draft: false
                 prerelease: false
             

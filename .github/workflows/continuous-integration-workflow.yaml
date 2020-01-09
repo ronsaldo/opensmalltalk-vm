@@ -164,4 +164,4 @@ jobs:
                 url: "https://jenkins.feenk.com/"
                 user: "georgeganea@gmail.com"
                 token: ${{ secrets.JENKINS_TOKEN }}
-                job: "feenkcom/gtoolkit"
+                job: "feenkcom/gtoolkit/master"

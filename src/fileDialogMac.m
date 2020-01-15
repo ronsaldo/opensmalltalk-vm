@@ -2,7 +2,44 @@
 #import <AppKit/AppKit.h>
 #include "pharovm/fileDialog.h"
 #include "pharovm/stringUtilities.h"
+#include "pharovm/pathUtilities.h"
 #include <string.h>
+#include <stdbool.h>
+
+/**
+ * Gatekeeper in OS X runs application downloaded from unsigned zips in a
+ * randomized read-only DMG. See https://objective-see.com/blog/blog_0x15.html
+ * for an explanation of this fix.
+ */
+static NSURL *untranslocatePath(NSURL *originalPath)
+{
+	void *handle = NULL;
+
+	//open security framework
+	handle = dlopen("/System/Library/Frameworks/Security.framework/Security", RTLD_LAZY);
+	if(!handle)
+		return originalPath;
+
+	Boolean (*secTranslocateIsTranslocatedURL)(CFURLRef path, bool *isTranslocated, CFErrorRef * __nullable error);
+	secTranslocateIsTranslocatedURL = dlsym(handle, "SecTranslocateIsTranslocatedURL");
+
+	bool isTranslocated = false;
+	secTranslocateIsTranslocatedURL((__bridge CFURLRef)originalPath, &isTranslocated, NULL);
+
+	NSURL *untranslocatedPath = nil;
+	if(isTranslocated)
+	{
+		CFURLRef __nullable (*secTranslocateCreateOriginalPathForURL)(CFURLRef translocatedPath, CFErrorRef * __nullable error);
+		secTranslocateCreateOriginalPathForURL = dlsym(handle, "SecTranslocateCreateOriginalPathForURL");
+		// HACK: Call this function with the full bundle path. It does not seem to work with just the bundle parent folder.
+		untranslocatedPath = (__bridge NSURL*)secTranslocateCreateOriginalPathForURL((__bridge CFURLRef)[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]], NULL);
+		if(untranslocatedPath != nil)
+			untranslocatedPath = [untranslocatedPath URLByDeletingLastPathComponent];
+	}
+
+	dlclose(handle);
+	return untranslocatedPath != nil ? untranslocatedPath : originalPath;
+}
 
 bool
 vm_file_dialog_is_nop(void)
@@ -36,7 +73,7 @@ vm_file_dialog_run_modal_open(VMFileDialog *dialog)
 	{
 		char *defaultDirectory = (char*)calloc(1, FILENAME_MAX+1);
 		vm_path_extract_dirname_into(defaultDirectory, FILENAME_MAX+1, dialog->defaultFileNameAndPath);
-		panel.directoryURL = [NSURL fileURLWithPath: [NSString stringWithUTF8String: defaultDirectory]];
+		panel.directoryURL = untranslocatePath([NSURL fileURLWithPath: [NSString stringWithUTF8String: defaultDirectory]]);
 		free(defaultDirectory);
 	}
 

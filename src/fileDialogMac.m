@@ -5,6 +5,7 @@
 #include "pharovm/pathUtilities.h"
 #include <string.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 /**
  * Gatekeeper in OS X runs application downloaded from unsigned zips in a
@@ -34,7 +35,16 @@ static NSURL *untranslocatePath(NSURL *originalPath)
 		// HACK: Call this function with the full bundle path. It does not seem to work with just the bundle parent folder.
 		untranslocatedPath = (__bridge NSURL*)secTranslocateCreateOriginalPathForURL((__bridge CFURLRef)[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]], NULL);
 		if(untranslocatedPath != nil)
+		{
 			untranslocatedPath = [untranslocatedPath URLByDeletingLastPathComponent];
+			NSString *pathString = untranslocatedPath.path;
+			if(pathString != nil)
+			{
+				const char *pathUTF8 = [pathString UTF8String];
+				if(pathUTF8)
+					chdir(pathUTF8);
+			}
+		}
 	}
 
 	dlclose(handle);

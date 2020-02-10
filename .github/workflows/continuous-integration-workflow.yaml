@@ -28,7 +28,9 @@ jobs:
         steps:
             - name: Install dependencies
               if: matrix.variant.os == 'ubuntu-18.04'
-              run: sudo apt-get install uuid-dev
+              run: |
+                sudo apt-get update
+                sudo apt-get install uuid-dev
 
             - uses: actions/checkout@v1
 

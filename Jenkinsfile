@@ -7,7 +7,7 @@ def isWindows(){
 }
 
 def shell(params){
-    if(isWindows()) bat(params) 
+    if(isWindows()) bat(params)
     else sh(params)
 }
 
@@ -17,9 +17,9 @@ def runInCygwin(command){
     set -ex
     ${command}
     """
-    
+
     echo("Executing: ${c}")
-    withEnv(["PHARO_CI_TESTING_ENVIRONMENT=true"]) {    
+    withEnv(["PHARO_CI_TESTING_ENVIRONMENT=true"]) {
       return sh(c)
     }
 }
@@ -43,10 +43,10 @@ def buildGTKBundle(){
 				dir("bundleGTK"){
 					shell "zip -r -9 ../${gtkBundleName} *"
 				}
-			
+
 				stash includes: "${gtkBundleName}", name: "packages-windows-gtkBundle"
 				archiveArtifacts artifacts: "${gtkBundleName}"
-				
+
 				if(!isPullRequest() && env.BRANCH_NAME == 'headless'){
 					sshagent (credentials: ['b5248b59-a193-4457-8459-e28e9eb29ed7']) {
 						sh "scp -o StrictHostKeyChecking=no \
@@ -65,7 +65,7 @@ def buildGTKBundle(){
 
 def runBuild(platform, configuration){
 	cleanWs()
-	
+
 
     stage("Checkout-${platform}"){
       dir('repository') {
@@ -96,9 +96,9 @@ def runTests(platform, configuration, packages){
 	cleanWs()
 
 	stage("Tests-${platform}-${configuration}"){
-		
+
 		def vmDir = ''
-		
+
 		if(platform == 'osx'){
 			vmDir = 'mac'
 		}else{
@@ -114,7 +114,7 @@ def runTests(platform, configuration, packages){
     	dir("runTests"){
           shell "wget -O - get.pharo.org/64/80 | bash "
           shell "echo 80 > pharo.version"
-          
+
           if(isWindows()){
             runInCygwin "cd runTests && unzip ../build/build/packages/PharoVM-*-${vmDir}64-bin.zip -d ."
             runInCygwin "PHARO_CI_TESTING_ENVIRONMENT=true cd runTests && ./PharoConsole.exe  --logLevel=4 Pharo.image test --junit-xml-output --stage-name=win64-${configuration} '${packages}'"
@@ -125,15 +125,15 @@ def runTests(platform, configuration, packages){
             if(platform == 'osx'){
               shell "PHARO_CI_TESTING_ENVIRONMENT=true ./Pharo.app/Contents/MacOS/Pharo --logLevel=4 Pharo.image test --junit-xml-output --stage-name=osx64-${configuration} '${packages}'"
               shell "PHARO_CI_TESTING_ENVIRONMENT=true ./Pharo.app/Contents/MacOS/Pharo --logLevel=4 --worker Pharo.image test --junit-xml-output --stage-name=osx64-${configuration}-worker '${packages}'"
-    		}			
+    		}
             if(platform == 'unix'){
-              shell "PHARO_CI_TESTING_ENVIRONMENT=true ./pharo --logLevel=4 Pharo.image test --junit-xml-output --stage-name=unix64-${configuration} '${packages}'" 
-              shell "PHARO_CI_TESTING_ENVIRONMENT=true ./pharo --logLevel=4 --worker Pharo.image test --junit-xml-output --stage-name=unix64-${configuration}-worker '${packages}'" 
+              shell "PHARO_CI_TESTING_ENVIRONMENT=true ./pharo --logLevel=4 Pharo.image test --junit-xml-output --stage-name=unix64-${configuration} '${packages}'"
+              shell "PHARO_CI_TESTING_ENVIRONMENT=true ./pharo --logLevel=4 --worker Pharo.image test --junit-xml-output --stage-name=unix64-${configuration}-worker '${packages}'"
             }
     	  }
     		junit allowEmptyResults: true, testResults: "*.xml"
     	}
-				
+
 		archiveArtifacts artifacts: 'runTests/*.xml', excludes: '_CPack_Packages'
 	}
 }
@@ -176,12 +176,12 @@ def uploadPackages(){
 				echo "[DO NO UPLOAD] In PR " + (env.CHANGE_ID?.trim())
 				return;
 			}
-			
+
 			if(env.BRANCH_NAME != 'headless'){
 				echo "[DO NO UPLOAD] In branch different that 'headless': ${env.BRANCH_NAME}";
 				return;
 			}
-			
+
 			upload('osx', "CoInterpreterWithQueueFFI", 'mac')
 			upload('unix', "CoInterpreterWithQueueFFI",'linux')
 			upload('windows', "CoInterpreterWithQueueFFI", 'win')
@@ -199,24 +199,24 @@ try{
 	for (platf in platforms) {
         // Need to bind the label variable before the closure - can't do 'for (label in labels)'
         def platform = platf
-		
+
 		builders[platform] = {
 			node(platform){
 				timeout(30){
-					runBuild(platform, "CoInterpreterWithQueueFFI")
+					runBuild(platform, "CoInterpreterWithQueueFFIWithLowcode")
 				}
 			}
 		}
-		
+
 		tests[platform] = {
 			node(platform){
 				timeout(45){
-					runTests(platform, "CoInterpreterWithQueueFFI", ".*")
+					runTests(platform, "CoInterpreterWithQueueFFIWithLowcode", ".*")
 				}
 			}
 		}
 	}
-/*  
+/*
   builders["StackVM"] = {
     node('osx'){
       timeout(30){
@@ -231,9 +231,9 @@ try{
       }
     }
   }
-*/    
+*/
 	parallel builders
-	
+
 	uploadPackages()
 
 	buildGTKBundle()

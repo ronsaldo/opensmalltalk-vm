@@ -15066,11 +15066,16 @@ StackInterpreter >> mapStackPages [
 			[self assert: (thePage addressIsInPage: theFP).
 			 self assert: (thePage addressIsInPage: theSP).
 			 self assert: (theIPPtr = 0 or: [thePage addressIsInPage: theIPPtr]).
-			 hasNativeStack := self isFrameWithNativeFrame: theFP sp: theSP.
-			 nativeStackPointer := hasNativeStack
-				ifTrue: [self nativeStackPointerIn: theFP ]
-				ifFalse: [ theFP + FoxReceiver + BytesPerWord ].
-			 nativeStackEnd := self nativeStackEnd: theFP.
+			 LowcodeVM ifTrue: [
+				 hasNativeStack := self isFrameWithNativeFrame: theFP sp: theSP.
+				 nativeStackPointer := hasNativeStack
+					ifTrue: [self nativeStackPointerIn: theFP ]
+					ifFalse: [ theFP + FoxReceiver + BytesPerWord ].
+				 nativeStackEnd := self nativeStackEnd: theFP.
+			 ] ifFalse: [
+				"This should be compiled out into a nop"
+				nativeStackPointer := nativeStackEnd := theFP.
+			 ].
 			 [theSP <= (theFP + FoxReceiver)] whileTrue: [
 				(nativeStackPointer <= theSP and: [ theSP < nativeStackEnd ]) ifFalse: [ 
 					[oop := stackPages longAt: theSP.

@@ -5189,10 +5189,15 @@ CoInterpreter >> mapStackPages [
 			 self assert: (theIPPtr = 0 or: [thePage addressIsInPage: theIPPtr]).
 			 frameRcvrOffset := self frameReceiverLocation: theFP.
 			 hasNativeStack := self isFrameWithNativeFrame: theFP sp: theSP.
-			 nativeStackPointer := hasNativeStack
-				ifTrue: [self nativeStackPointerIn: theFP ]
-				ifFalse: [ frameRcvrOffset + BytesPerWord ].
-			 nativeStackEnd := self nativeStackEnd: theFP.
+			 LowcodeVM ifTrue: [
+				 nativeStackPointer := hasNativeStack
+					ifTrue: [self nativeStackPointerIn: theFP ]
+					ifFalse: [ frameRcvrOffset + BytesPerWord ].
+				 nativeStackEnd := self nativeStackEnd: theFP.
+			] ifFalse: [
+				"This should be compiled out into a nop"
+				nativeStackPointer := nativeStackEnd := theFP.
+			].
 				
 	 		  [theSP <= frameRcvrOffset] whileTrue: [
 				(nativeStackPointer <= theSP and: [ theSP < nativeStackEnd ]) ifFalse: [ 

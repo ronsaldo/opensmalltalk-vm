@@ -92,11 +92,13 @@ def runBuild(platform, configuration){
 	}
 }
 
-def runTests(platform, configuration, packages){
+def runTests(platform, configuration, packages, withWorker){
 	cleanWs()
 
-	stage("Tests-${platform}-${configuration}"){
+	def stageName = withWorker ? "Tests-${platform}-${configuration}-worker" : "Tests-${platform}-${configuration}"
 
+	stage(stageName){
+		
 		def vmDir = ''
 
 		if(platform == 'osx'){
@@ -112,23 +114,32 @@ def runTests(platform, configuration, packages){
 
     	shell "mkdir runTests"
     	dir("runTests"){
-          shell "wget -O - get.pharo.org/64/80 | bash "
-          shell "echo 80 > pharo.version"
-
+          shell "wget -O - get.pharo.org/64/90 | bash "
+          shell "echo 90 > pharo.version"
+          
           if(isWindows()){
             runInCygwin "cd runTests && unzip ../build/build/packages/PharoVM-*-${vmDir}64-bin.zip -d ."
-            runInCygwin "PHARO_CI_TESTING_ENVIRONMENT=true cd runTests && ./PharoConsole.exe  --logLevel=4 Pharo.image test --junit-xml-output --stage-name=win64-${configuration} '${packages}'"
-            runInCygwin "PHARO_CI_TESTING_ENVIRONMENT=true cd runTests && ./PharoConsole.exe  --logLevel=4 --worker Pharo.image test --junit-xml-output --stage-name=win64-${configuration}-worker '${packages}'"
+			if(withWorker){
+	            runInCygwin "PHARO_CI_TESTING_ENVIRONMENT=true cd runTests && ./PharoConsole.exe  --logLevel=4 --worker Pharo.image test --junit-xml-output --stage-name=win64-${configuration}-worker '${packages}'"
+			}else{
+				runInCygwin "PHARO_CI_TESTING_ENVIRONMENT=true cd runTests && ./PharoConsole.exe  --logLevel=4 Pharo.image test --junit-xml-output --stage-name=win64-${configuration} '${packages}'"
+			}
     	  }else{
             shell "unzip ../build/build/packages/PharoVM-*-${vmDir}64-bin.zip -d ."
 
             if(platform == 'osx'){
-              shell "PHARO_CI_TESTING_ENVIRONMENT=true ./Pharo.app/Contents/MacOS/Pharo --logLevel=4 Pharo.image test --junit-xml-output --stage-name=osx64-${configuration} '${packages}'"
-              shell "PHARO_CI_TESTING_ENVIRONMENT=true ./Pharo.app/Contents/MacOS/Pharo --logLevel=4 --worker Pharo.image test --junit-xml-output --stage-name=osx64-${configuration}-worker '${packages}'"
-    		}
+				if(withWorker){
+					shell "PHARO_CI_TESTING_ENVIRONMENT=true ./Pharo.app/Contents/MacOS/Pharo --logLevel=4 --worker Pharo.image test --junit-xml-output --stage-name=osx64-${configuration}-worker '${packages}'"
+				} else {
+	                shell "PHARO_CI_TESTING_ENVIRONMENT=true ./Pharo.app/Contents/MacOS/Pharo --logLevel=4 Pharo.image test --junit-xml-output --stage-name=osx64-${configuration} '${packages}'"
+				}
+    		}			
             if(platform == 'unix'){
-              shell "PHARO_CI_TESTING_ENVIRONMENT=true ./pharo --logLevel=4 Pharo.image test --junit-xml-output --stage-name=unix64-${configuration} '${packages}'"
-              shell "PHARO_CI_TESTING_ENVIRONMENT=true ./pharo --logLevel=4 --worker Pharo.image test --junit-xml-output --stage-name=unix64-${configuration}-worker '${packages}'"
+				if(withWorker){
+	                shell "PHARO_CI_TESTING_ENVIRONMENT=true ./pharo --logLevel=4 --worker Pharo.image test --junit-xml-output --stage-name=unix64-${configuration}-worker '${packages}'" 
+				}else{
+	                shell "PHARO_CI_TESTING_ENVIRONMENT=true ./pharo --logLevel=4 Pharo.image test --junit-xml-output --stage-name=unix64-${configuration} '${packages}'" 
+				}
             }
     	  }
     		junit allowEmptyResults: true, testResults: "*.xml"
@@ -182,9 +193,9 @@ def uploadPackages(){
 				return;
 			}
 
-			upload('osx', "CoInterpreterWithQueueFFI", 'mac')
-			upload('unix', "CoInterpreterWithQueueFFI",'linux')
-			upload('windows', "CoInterpreterWithQueueFFI", 'win')
+			upload('osx', "CoInterpreterWithQueueFFIWithLowcode", 'mac')
+			upload('unix', "CoInterpreterWithQueueFFIWithLowcode",'linux')
+			upload('windows', "CoInterpreterWithQueueFFIWithLowcode", 'win')
 		}
 	}
 }
@@ -207,12 +218,15 @@ try{
 				}
 			}
 		}
-
+		
 		tests[platform] = {
 			node(platform){
 				timeout(45){
-					runTests(platform, "CoInterpreterWithQueueFFIWithLowcode", ".*")
+					runTests(platform, "CoInterpreterWithQueueFFIWithLowcode", ".*", false)
 				}
+				timeout(45){
+					runTests(platform, "CoInterpreterWithQueueFFIWithLowcode", ".*", true)
+				}				
 			}
 		}
 	}
